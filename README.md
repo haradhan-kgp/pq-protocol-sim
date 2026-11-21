@@ -1,4 +1,4 @@
-\# Post-Quantum Vehicle-RSU Authentication Protocol (Simulation)
+﻿# Post-Quantum Vehicle-RSU Authentication Protocol (Simulation)
 
 
 
@@ -6,33 +6,33 @@ C simulation of a Kyber-512 (liboqs) based authentication and key agreement prot
 
 
 
-\## Requirements
+## Requirements
 
-\- liboqs 0.12.0, OpenSSL
+- liboqs 0.12.0, OpenSSL
 
-\- Or use the provided Dockerfile (no local install needed)
+- Or use the provided Dockerfile (no local install needed)
 
 
 
-\## Run with Docker
+## Run with Docker
 
 ```
 
 docker build -t oqs-gcc .
 
-docker run --rm -v ${PWD}:/app -w /app oqs-gcc bash -c "gcc -O2 protocol.c -o protocol -loqs -lssl -lcrypto -lm \&\& ./protocol"
+docker run --rm -v ${PWD}:/app -w /app oqs-gcc bash -c "gcc -O2 protocol.c -o protocol -loqs -lssl -lcrypto -lm && ./protocol"
 
 ```
 
 
 
-\## Sample output
+## Sample output
 
-See sample\_output.txt. Hex values differ on every run because keys and nonces are random.
+See sample_output.txt. Hex values differ on every run because keys and nonces are random.
 
 
 
-\## Note
+## Note
 
 PUF and fuzzy extractor are simulated; this is a functional prototype, not production code.
 
