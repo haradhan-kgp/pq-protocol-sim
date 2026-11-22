@@ -13,7 +13,7 @@
 #define KEY_LEN   32
 #define PSN_LEN   32
 
-/* ===================== Utility ===================== */
+/* Utility */
 
 static int random_bytes(unsigned char *buf, int len) {
     return RAND_bytes(buf, len) == 1 ? 0 : -1;
@@ -26,7 +26,7 @@ static void print_hex(const char *label, const unsigned char *buf, int len) {
     printf("\n");
 }
 
-/* ===================== HASH / HMAC / KDF ===================== */
+/* HASH / HMAC / KDF */
 
 static void hash(const unsigned char *input, int len, unsigned char *output) {
     SHA256(input, len, output);
@@ -43,7 +43,7 @@ static void kdf(const unsigned char *input, int len, unsigned char *output) {
     hash(input, len, output);
 }
 
-/* ===================== PUF + FE (Simulated) ===================== */
+/*  PUF + FE (Simulated) */
 
 /* Gen(PUF) -> (sigma, helper data) */
 static void FE_Gen(const unsigned char *puf, unsigned char *sigma, unsigned char *hd) {
@@ -57,7 +57,7 @@ static void FE_Rep(const unsigned char *puf, const unsigned char *hd, unsigned c
     hash(puf, 32, sigma);
 }
 
-/* ===================== Entities ===================== */
+/* Entities */
 
 typedef struct {
     OQS_KEM *kem;
@@ -65,7 +65,7 @@ typedef struct {
     uint8_t *sk;
 } Entity;
 
-/* ===================== MAIN ===================== */
+/* MAIN simulation*/
 
 int main(void) {
     int ok = 1;
@@ -90,12 +90,12 @@ int main(void) {
     OQS_KEM_keypair(O.kem, O.pk, O.sk);
     OQS_KEM_keypair(R.kem, R.pk, R.sk);
 
-    /* ---------- PUF ENROLLMENT ---------- */
+    /* PUF ENROLLMENT  */
     unsigned char puf[32], sigma[32], hd[32];
     random_bytes(puf, 32);
     FE_Gen(puf, sigma, hd);
 
-    /* ---------- REGISTRATION ---------- */
+    /* REGISTRATION  */
     unsigned char PSN[PSN_LEN];
     hash(puf, 32, PSN);   /* simplified PSN */
 
@@ -109,7 +109,7 @@ int main(void) {
         hash(in, 68, AuthK_R);
     }
 
-    /* ---------- STEP 1/2: Vehicle request (M1) ---------- */
+    /* Vehicle request (M1)  */
     unsigned char sigma_rec[32];
     FE_Rep(puf, hd, sigma_rec);   /* ideal (noise-free) PUF re-evaluation */
 
@@ -133,7 +133,7 @@ int main(void) {
 
     printf("Vehicle -> RSU: M1 sent\n");
 
-    /* ---------- STEP 3: RSU response (M2) ---------- */
+    /*RSU response (M2)  */
     unsigned char M1_chk[32];
     compute_hmac(AuthK_R, 32, ctOR, (int)R.kem->length_ciphertext, M1_chk);
     if (memcmp(M1, M1_chk, 32) != 0) ok = 0;   /* RSU verifies M1 */
@@ -160,7 +160,7 @@ int main(void) {
 
     printf("RSU -> Vehicle: M2 sent\n");
 
-    /* ---------- STEP 4: Vehicle final (M3) ---------- */
+    /* Vehicle final (M3) */
     uint8_t KR_O_dec[KEY_LEN];
     OQS_KEM_decaps(O.kem, KR_O_dec, ctRO, O.sk);
 
@@ -179,7 +179,7 @@ int main(void) {
     compute_hmac(Ksess_R, 32, nR, NONCE_LEN, M3_chk);   /* RSU verifies M3 */
     if (memcmp(M3, M3_chk, 32) != 0) ok = 0;
 
-    /* ---------- PRINT VALUES ---------- */
+    /* PRINT VALUES */
     print_hex("KO_R (Vehicle)", KO_R,     KEY_LEN);
     print_hex("KO_R (RSU)   ",  KO_R_dec, KEY_LEN);
     print_hex("KR_O (RSU)   ",  KR_O,     KEY_LEN);
@@ -189,7 +189,7 @@ int main(void) {
     print_hex("Vehicle Session Key", Ksess_O, 32);
     print_hex("RSU Session Key    ", Ksess_R, 32);
 
-    /* ---------- VERIFY ---------- */
+    /*  VERIFY */
     if (ok && memcmp(Ksess_O, Ksess_R, 32) == 0)
         printf("SUCCESS: Session keys match!\n");
     else
@@ -197,7 +197,7 @@ int main(void) {
 
     printf("=== Protocol Complete ===\n");
 
-    /* ---------- CLEANUP ---------- */
+    /* CLEANUP  */
     free(ctOR); free(ctRO);
     free(O.pk); free(O.sk); free(R.pk); free(R.sk);
     OQS_KEM_free(O.kem);
