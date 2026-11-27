@@ -32,7 +32,5 @@ See sample_output.txt. Hex values differ on every run because keys and nonces ar
 
 
 
-## Note
 
-PUF and fuzzy extractor are simulated; this is a functional prototype, not production code.
 
